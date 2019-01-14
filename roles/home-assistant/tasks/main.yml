@@ -43,8 +43,8 @@
       - "/etc/localtime:/etc/localtime:ro"
       - "/opt/home-assistant:/config"
     devices: 
-      - /dev/ttyACM0
-     networks:
+      - "/dev/ttyACM0"
+    networks:
       - name: cloudbox
         aliases:
           - homeassistant
