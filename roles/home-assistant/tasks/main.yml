@@ -37,13 +37,18 @@
     published_ports:
       - "8123:8123/tcp"
     env:
-      LETSENCRYPT_HOST: "homeassistant.{{domain}}"
+      VIRTUAL_HOST: "home-assistant.{{domain}}"
+      VIRTUAL_PORT: 8123
+      LETSENCRYPT_HOST: "home-assistant.{{domain}}"
       LETSENCRYPT_EMAIL: "{{email}}"
+
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/opt/home-assistant:/config"
     devices: 
       - "/dev/ttyACM0"
+    labels:
+      "com.github.cloudbox.cloudbox_managed": "true"
     networks:
       - name: cloudbox
         aliases:
