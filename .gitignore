@@ -1,5 +1,6 @@
 # Ignore all files
 #*
+ansible.cfg
 
 # Ignore all files in subdirectories
 #**/**
