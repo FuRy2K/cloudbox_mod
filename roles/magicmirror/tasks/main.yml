@@ -1,0 +1,43 @@
+- name: "Setting CloudFlare DNS Record"
+  include_role:
+    name: cloudflare
+  vars:
+    subdomain: magicmirror
+
+- name: Stop and remove any existing container
+  docker_container:
+    name: magicmirror
+    state: absent
+
+- name: Create magicmirror directories
+  file: "path={{item}} state=directory mode=0775 owner={{user}} group={{user}}"
+  with_items:
+    - /opt/magicmirror
+
+- name: Create and start container
+  docker_container:
+    name: magicmirror
+    image: bastilimbach/docker-magicmirror 
+    pull: yes
+    published_ports:
+      - "127.0.0.1:8080:8080"
+    env:
+      PUID: "{{uid}}"
+      PGID: "{{gid}}"
+      VIRTUAL_HOST: "magicmirror.{{domain}}"
+      VIRTUAL_PORT: 8080
+      LETSENCRYPT_HOST: "magicmirror.{{domain}}"
+      LETSENCRYPT_EMAIL: "{{email}}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/opt/magicmirror/config:/opt/magic_mirror/config"
+      - "/opt/magicmirror/modules:/opt/magic_mirror/modules"
+    labels:
+      "com.github.cloudbox.cloudbox_managed": "true"
+    networks:
+      - name: cloudbox
+        aliases:
+          - magicmirror
+    purge_networks: yes
+    restart_policy: unless-stopped 
+    state: started

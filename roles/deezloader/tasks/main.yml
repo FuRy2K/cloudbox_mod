@@ -1,0 +1,43 @@
+- name: "Setting CloudFlare DNS Record"
+  include_role:
+    name: cloudflare
+  vars:
+    subdomain: deezloader
+
+- name: Stop and remove any existing container
+  docker_container:
+    name: deezloader
+    state: absent
+
+- name: Create deezloader directories
+  file: "path={{item}} state=directory mode=0775 owner={{user}} group={{user}}"
+  with_items:
+    - /opt/deezloader
+
+- name: Create and start container
+  docker_container:
+    name: deezloader
+    image: fury2k/deezloaderremix 
+    pull: yes
+    published_ports:
+      - "127.0.0.1:1730:1730"
+    env:
+      PUID: "{{uid}}"
+      PGID: "{{gid}}"
+      VIRTUAL_HOST: "deezloader.{{domain}}"
+      VIRTUAL_PORT: 1730
+      LETSENCRYPT_HOST: "deezloader.{{domain}}"
+      LETSENCRYPT_EMAIL: "{{email}}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/opt/deezloader:/config"
+      - "/mnt/local/downloads/music:/music"
+    labels:
+      "com.github.cloudbox.cloudbox_managed": "true"
+    networks:
+      - name: cloudbox
+        aliases:
+          - deezloader
+    purge_networks: yes
+    restart_policy: always
+    state: started

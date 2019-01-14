@@ -1,0 +1,24 @@
+---
+- name: Stop and remove any existing container
+  docker_container:
+    name: autoheal
+    state: absent
+
+- name: Create container
+  docker_container:
+    name: autoheal
+    image: "willfarrell/autoheal"
+    pull: yes
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    env:
+            AUTOHEAL_CONTAINER_LABEL: "all"
+    labels:
+      "com.github.cloudbox.cloudbox_managed": "true"
+    networks:
+      - name: cloudbox
+        aliases:
+          - autoheal
+    purge_networks: yes
+    state: started
