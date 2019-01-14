@@ -10,3 +10,4 @@
     - { role: magicmirror, tags: ['magicmirror'] }
     - { role: deezloader, tags: ['deezloader'] }
     - { role: autoheal, tags: ['autoheal'] }
+    - { role: home-assistant, tags: ['home-assistant'] }

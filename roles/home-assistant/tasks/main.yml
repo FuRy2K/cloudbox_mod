@@ -1,0 +1,53 @@
+#########################################################################
+# Title:         Cloudbox: Homeassistant Role                           #
+# Author(s):     l3uddz, desimaniac                                     #
+# URL:           https://github.com/cloudbox/cloudbox                   #
+# Docker Image:  homeassistant/home-assistant                           #
+# --                                                                    #
+#         Part of the Cloudbox project: https://cloudbox.works          #
+#########################################################################
+#                   GNU General Public License v3.0                     #
+#########################################################################
+---
+- name: "Set DNS Record on CloudFlare"
+  include_role:
+    name: cloudflare
+  vars:
+    subdomain: homeassistant
+
+- name: "Create Home-assistant directories"
+  file: "path={{item}} state=directory mode=0775 owner={{user}} group={{user}}"
+  with_items:
+    - "/opt/home-assistant"
+
+- name: "Stop and remove any existing container"
+  docker_container:
+    name: homeassistant
+    state: absent
+
+- name: "Pull Homeassistant Docker image"
+  docker_image:
+    name: "homeassistant/home-assistant"
+
+- name: "Create and start container"
+  docker_container:
+    name: homeassistant
+    image: "homeassistant/home-assistant"
+    pull: yes
+    published_ports:
+      - "8123:8123/tcp"
+    env:
+      LETSENCRYPT_HOST: "homeassistant.{{domain}}"
+      LETSENCRYPT_EMAIL: "{{email}}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/opt/home-assistant:/config"
+    devices: 
+      - /dev/ttyACM0
+     networks:
+      - name: cloudbox
+        aliases:
+          - homeassistant
+    purge_networks: yes
+    restart_policy: unless-stopped
+    state: started
