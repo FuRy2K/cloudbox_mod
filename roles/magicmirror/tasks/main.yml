@@ -24,12 +24,12 @@
     env:
       PUID: "{{uid}}"
       PGID: "{{gid}}"
+      TZ: "America/New_York"
       VIRTUAL_HOST: "magicmirror.{{domain}}"
       VIRTUAL_PORT: 8080
       LETSENCRYPT_HOST: "magicmirror.{{domain}}"
       LETSENCRYPT_EMAIL: "{{email}}"
     volumes:
-      - "/etc/localtime:/etc/localtime:ro"
       - "/opt/magicmirror/config:/opt/magic_mirror/config"
       - "/opt/magicmirror/modules:/opt/magic_mirror/modules"
     labels:
