@@ -1,0 +1,47 @@
+- name: "Setting CloudFlare DNS Record"
+  include_role:
+    name: cloudflare
+  vars:
+    subdomain: librenms
+
+- name: Stop and remove any existing container
+  docker_container:
+    name: librenms
+    state: absent
+
+- name: Create librenms directories
+  file: "path={{item}} state=directory mode=0775 owner={{user}} group={{user}}"
+  with_items:
+    - /opt/librenms
+
+- name: Create and start container
+  docker_container:
+    name: librenms
+    image: librenms/librenms:latest 
+    pull: yes
+    published_ports:
+      - "127.0.0.1:8888:80"
+      - "0.0.0.0:514:514/udp"
+    env:
+      PUID: "{{uid}}"
+      PGID: "{{gid}}"
+      TZ: "America/New_York"
+      VIRTUAL_HOST: "librenms.{{domain}}"
+      VIRTUAL_PORT: 8888
+      LETSENCRYPT_HOST: "librenms.{{domain}}"
+      LETSENCRYPT_EMAIL: "{{email}}"
+      DB_HOST: "mariadb"
+      DB_NAME: "librenms"
+      DB_USER: "librenms"
+      DB_PASSWORD: "librenms"
+    volumes:
+      - "/opt/librenms/data:/data"
+    labels:
+      "com.github.cloudbox.cloudbox_managed": "true"
+    networks:
+      - name: cloudbox
+        aliases:
+          - librenms
+    purge_networks: yes
+    restart_policy: unless-stopped 
+    state: started

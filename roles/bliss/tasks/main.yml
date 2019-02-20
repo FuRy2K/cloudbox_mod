@@ -1,0 +1,40 @@
+- name: "Setting CloudFlare DNS Record"
+  include_role:
+    name: cloudflare
+  vars:
+    subdomain: bliss
+
+- name: Stop and remove any existing container
+  docker_container:
+    name: bliss
+    state: absent
+
+- name: Create bliss directories
+  file: "path={{item}} state=directory mode=0775 owner={{user}} group={{user}}"
+  with_items:
+    - /opt/bliss
+
+- name: Create and start container
+  docker_container:
+    name: bliss
+    image: romancin/bliss:latest 
+    pull: yes
+    published_ports:
+      - "0.0.0.0:3220:3220"
+      - "0.0.0.0:3221:3221"
+    env:
+      PUID: "{{uid}}"
+      PGID: "{{gid}}"
+      TZ: "America/New_York"
+    volumes:
+      - "/opt/bliss/config:/config"
+      - "/mnt/unionfs/Media/Music:/music"
+    labels:
+      "com.github.cloudbox.cloudbox_managed": "true"
+    networks:
+      - name: cloudbox
+        aliases:
+          - bliss
+    purge_networks: yes
+    restart_policy: unless-stopped 
+    state: started

@@ -11,3 +11,5 @@
     - { role: deezloader, tags: ['deezloader'] }
     - { role: autoheal, tags: ['autoheal'] }
     - { role: home-assistant, tags: ['home-assistant'] }
+    - { role: librenms, tags: ['librenms'] }
+    - { role: bliss, tags: ['bliss'] }
