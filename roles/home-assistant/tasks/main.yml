@@ -11,12 +11,13 @@
 ---
 - name: "Set DNS Record on CloudFlare"
   include_role:
-    name: cloudflare
+    name: cloudflare-dns
   vars:
-    subdomain: homeassistant
+    record: home-assistant 
+  when: cloudflare_enabled
 
 - name: "Create Home-assistant directories"
-  file: "path={{item}} state=directory mode=0775 owner={{user}} group={{user}}"
+  file: "path={{ item }} state=directory mode=0775 owner={{ user.name }} group={{ user.name }}"
   with_items:
     - "/opt/home-assistant"
 
@@ -37,10 +38,10 @@
     published_ports:
       - "8123:8123/tcp"
     env:
-      VIRTUAL_HOST: "home-assistant.{{domain}}"
+      VIRTUAL_HOST: "home-assistant.{{ user.domain }}"
       VIRTUAL_PORT: 8123
-      LETSENCRYPT_HOST: "home-assistant.{{domain}}"
-      LETSENCRYPT_EMAIL: "{{email}}"
+      LETSENCRYPT_HOST: "home-assistant.{{ user.domain }}"
+      LETSENCRYPT_EMAIL: "{{ user.email }}"
 
     volumes:
       - "/etc/localtime:/etc/localtime:ro"

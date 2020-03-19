@@ -1,0 +1,59 @@
+#########################################################################
+# Title:            Community: firefox                                  #
+# Author(s):        atilling                                            #
+# URL:              https://github.com/Cloudbox/Community               #
+# Docker Image(s):  jlesage/firefox                                     #
+# --                                                                    #
+#         Part of the Cloudbox project: https://cloudbox.works          #
+#########################################################################
+#                   GNU General Public License v3.0                     #
+#########################################################################
+---
+- name: "Setting CloudFlare DNS Record"
+  include_role:
+    name: cloudflare-dns
+  vars:
+    record: firefox
+  when: cloudflare_enabled
+
+- name: Stop and remove any existing container
+  docker_container:
+    name: firefox
+    state: absent
+
+- name: Create firefox directories
+  file: "path={{ item }} state=directory mode=0775 owner={{ user.name }} group={{ user.name }}"
+  with_items:
+    - /opt/firefox
+
+- name: Create and start container
+  docker_container:
+    name: firefox
+    image: jlesage/firefox
+    pull: yes
+    published_ports:
+      - "127.0.0.1:5801:5800"
+    env:
+      USER_ID: "{{ uid }}"
+      GROUP_ID: "{{ gid }}"
+      VIRTUAL_HOST: "firefox.{{ user.domain }}"
+      VIRTUAL_PORT: 5800
+      LETSENCRYPT_HOST: "firefox.{{ user.domain }}"
+      LETSENCRYPT_EMAIL: "{{ user.email }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/opt/firefox:/config"
+      - "/mnt:/mnt"
+      - "/mnt/unionfs/Media/TV:/storage/Media/TV Shows"
+      - "/mnt/unionfs/Media/Movies/Movies:/storage/Media/Movies"
+      - "/mnt/local/downloads:/storage/downloads"
+      - "/dev/shm:/dev/shm"
+    labels:
+      "com.github.cloudbox.cloudbox_managed": "true"
+    networks:
+      - name: cloudbox
+        aliases:
+          - firefox
+    purge_networks: yes
+    restart_policy: always
+    state: started

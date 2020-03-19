@@ -1,0 +1,26 @@
+---
+- name: Stop and remove any existing container
+  docker_container:
+    name: ouroboros
+    state: absent
+
+- name: Create container
+  docker_container:
+    name: ouroboros
+    image: "pyouroboros/ouroboros"
+    pull: yes
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    env:
+            CRON: "* 5 * * *" 
+            CLEANUP: true
+            NOTIFIERS: pover://uzqgf2n61i34jrownn2v8c73f2ofvw@akm5yqmg3dk3mubsvumwgbtx9rtrsa
+            TZ: "America/New_York"
+    labels:
+      "com.github.cloudbox.cloudbox_managed": "true"
+    networks:
+      - name: cloudbox
+        aliases:
+          - ouroboros
+    purge_networks: yes
+    state: started

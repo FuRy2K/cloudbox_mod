@@ -1,8 +1,8 @@
-- name: "Setting CloudFlare DNS Record"
-  include_role:
-    name: cloudflare
-  vars:
-    subdomain: magicmirror
+#- name: "Setting CloudFlare DNS Record"
+#  include_role:
+#    name: cloudflare
+#  vars:
+#    subdomain: magicmirror
 
 - name: Stop and remove any existing container
   docker_container:

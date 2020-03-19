@@ -13,3 +13,6 @@
     - { role: home-assistant, tags: ['home-assistant'] }
     - { role: librenms, tags: ['librenms'] }
     - { role: bliss, tags: ['bliss'] }
+    - { role: beets, tags: ['beets'] }
+    - { role: ouroboros,  tags: ['ouroboros'] }
+    - { role: firefox, tags: ['firefox'] }
